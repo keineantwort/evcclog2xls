@@ -1,9 +1,8 @@
-import datetime
 import logging
 import re
 from dataclasses import dataclass
 from dateutil import parser
-from datetime import time, date, datetime
+from datetime import datetime
 
 log = logging.getLogger(__name__)
 consoleHandler = logging.StreamHandler()
@@ -14,11 +13,13 @@ log.setLevel(logging.DEBUG)
 
 LEVEL_EXCEPTIONS = ["WARN", "FATAL", "TRACE", "ERROR"]
 
+
 @dataclass
 class ChargingPeriod:
     charge_point: str
     start: datetime
     stop: datetime = None
+
 
 @dataclass
 class DataPoint:
@@ -30,13 +31,13 @@ class DataPoint:
 
 def read_log_file(filename: str):
     log.debug(f"filename: {filename}")
-    with open(filename, 'r', encoding='UTF-8') as file:
+    with open(filename, 'r', encoding='UTF-8') as logfile:
         rex = re.compile(
             r".*]:\s\[(?P<target>.*)]\s(?P<level>DEBUG|WARN|INFO|ERROR|FATAL)\s(?P<date>\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s(?P<message>.*)")
         name_value_re = re.compile(r"(?P<name>.*):\s(?P<value>.*)")
         charging_periods = {}
         data_points = []
-        while line := file.readline():
+        while line := logfile.readline():
             result = rex.match(line)
             if result and result.group("level") not in LEVEL_EXCEPTIONS:
                 # log.debug(result.groupdict())
