@@ -1,15 +1,16 @@
 import logging
+
+from log import init_logger
 import re
 from dataclasses import dataclass
 from dateutil import parser
 from datetime import datetime
 
-log = logging.getLogger(__name__)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s"))
-log.addHandler(consoleHandler)
-# LogLevel
-log.setLevel(logging.DEBUG)
+import xlsxwriter
+
+from excel import *
+
+log = init_logger(log_level=logging.DEBUG)
 
 LEVEL_EXCEPTIONS = ["WARN", "FATAL", "TRACE", "ERROR"]
 
@@ -74,11 +75,42 @@ def read_log_file(filename: str):
                 else:
                     # undefined / uninteresting line
                     log.debug(f"doing nothing: {result.group('message')}")
-        log.debug(f"charging_periods: {charging_periods}")
-        log.debug(f"data_points: {data_points}")
+        log.debug(f"charging_points: {len(charging_periods)}")
+        log.debug(f"data_points: {len(data_points)}")
+        return charging_periods, data_points
+
+
+def write_charging_periods(workbook: xlsxwriter.Workbook, charging_periods=None):
+    if charging_periods is None:
+        charging_periods = {}
+    for lp_name, cps in charging_periods.items():
+        worksheet = add_worksheet(workbook=workbook, worksheet_name=lp_name,
+                                  header_list=[ExcelTableHeader(position=0, label="start", width=30),
+                                               ExcelTableHeader(position=1, label="stop", width=30)])
+        for idx, cp in enumerate(cps):
+
+            date_format = workbook.add_format({"num_format": "dd.mm.yyyy hh:mm:ss",
+                                               "align": "left"})
+            worksheet.write_datetime(idx + 1, 0, cp.start, date_format)
+            if cp.stop:
+                worksheet.write_datetime(idx + 1, 1, cp.stop, date_format)
+
+
+def main():
+    # file = "evcc_20230525_20230529.log"
+    file = "evcc_20230531.log"
+    cp, dp = read_log_file(file)
+
+    xlsx_file_name = 'evcc_log.xlsx'
+    if os.path.isfile(xlsx_file_name):
+        os.remove(xlsx_file_name)
+
+    workbook = xlsxwriter.Workbook(xlsx_file_name)
+    create_format(workbook)
+    write_charging_periods(workbook=workbook, charging_periods=cp)
+    workbook.close()
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    file = "evcc_20230525_20230529.log"
-    read_log_file(file)
+    main()
