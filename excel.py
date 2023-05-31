@@ -11,6 +11,7 @@ log = init_logger(log_level=logging.DEBUG)
 
 format_table_cell = None
 format_table_header = None
+format_table_date = None
 
 
 @dataclass
@@ -23,11 +24,16 @@ class ExcelTableHeader:
 def create_format(workbook):
     global format_table_header
     format_table_header = workbook.add_format({'bold': True, 'font_size': 13, 'bottom': 1})
+
     global format_table_cell
     format_table_cell = workbook.add_format({'font_size': 12})
     format_table_cell.set_text_wrap()
     format_table_cell.set_align('left')
     format_table_cell.set_align('top')
+
+    global format_table_date
+    format_table_date = workbook.add_format({"num_format": "dd.mm.yyyy hh:mm:ss",
+                                             "align": "left"})
 
     workbook.set_size(2000, 1500)
 
