@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/evcc2log.iml" filepath="$PROJECT_DIR$/.idea/evcc2log.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/evcclog2xls.iml" filepath="$PROJECT_DIR$/.idea/evcclog2xls.iml" />
     </modules>
   </component>
 </project>
